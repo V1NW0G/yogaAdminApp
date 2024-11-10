@@ -1,32 +1,139 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Form fields for course details -->
-    <EditText
-        android:id="@+id/course_day"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Day of the week"
-        android:padding="10dp"/>
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/course_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Time of course"
-        android:padding="10dp"/>
+        <!-- Date Picker EditText -->
+        <EditText
+            android:id="@+id/editTextDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Date (yyyy-MM-dd)"
+            android:focusable="false"
+            android:padding="12dp"
+            android:backgroundTint="@color/gray"
+            android:layout_marginTop="8dp"/>
 
-    <!-- Add other course details fields here -->
+        <!-- Time Picker EditText -->
+        <EditText
+            android:id="@+id/editTextTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Time of Course"
+            android:focusable="false"
+            android:padding="12dp"
+            android:backgroundTint="@color/gray"
+            android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/save_course_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save Course"
-        android:layout_gravity="center"/>
-</LinearLayout>
+        <!-- Capacity EditText with Increment/Decrement Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/buttonDecreaseCapacity"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="-"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/primaryColor"
+                android:textColor="@android:color/white"/>
+
+            <EditText
+                android:id="@+id/editTextCapacity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:hint="Capacity"
+                android:padding="12dp"
+                android:backgroundTint="@color/gray"/>
+
+            <Button
+                android:id="@+id/buttonIncreaseCapacity"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="+"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@color/primaryColor"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+
+        <!-- Duration EditText -->
+        <EditText
+            android:id="@+id/editTextDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="Duration (in minutes)"
+            android:padding="12dp"
+            android:backgroundTint="@color/gray"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Price EditText with Currency Symbol -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/textViewCurrencySymbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$"
+                android:textSize="18sp"
+                android:paddingEnd="8dp"/>
+
+            <EditText
+                android:id="@+id/editTextPrice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:hint="Price per Class"
+                android:padding="12dp"
+                android:backgroundTint="@color/gray"/>
+        </LinearLayout>
+
+        <!-- Type of Class -->
+        <EditText
+            android:id="@+id/editTextType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type of Class (e.g., Flow Yoga)"
+            android:padding="12dp"
+            android:backgroundTint="@color/gray"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Description -->
+        <EditText
+            android:id="@+id/editTextDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description (Optional)"
+            android:padding="12dp"
+            android:backgroundTint="@color/gray"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/buttonSaveCourse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Course"
+            android:layout_marginTop="24dp"
+            android:padding="12dp"
+            android:backgroundTint="@color/primaryColor"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+</ScrollView>
