@@ -2,7 +2,6 @@ package com.yogaapplication.adminapp.activities;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,7 +15,7 @@ import com.yogaapplication.adminapp.helper.YogaDatabaseHelper;
 import java.util.Calendar;
 
 public class AddCourseActivity extends AppCompatActivity {
-    private EditText editTextDate, editTextTime, editTextCapacity, editTextDuration, editTextPrice, editTextType, editTextDescription;
+    private EditText editTextCourseId, editTextDate, editTextTime, editTextCapacity, editTextDuration, editTextPrice, editTextType, editTextDescription;
     private TextView textViewCurrencySymbol;
     private Button buttonDecreaseCapacity, buttonIncreaseCapacity, buttonSaveCourse;
     private YogaDatabaseHelper dbHelper;
@@ -28,6 +27,7 @@ public class AddCourseActivity extends AppCompatActivity {
 
         dbHelper = new YogaDatabaseHelper(this);
 
+        editTextCourseId = findViewById(R.id.editTextCourseId);
         editTextDate = findViewById(R.id.editTextDate);
         editTextTime = findViewById(R.id.editTextTime);
         editTextCapacity = findViewById(R.id.editTextCapacity);
@@ -40,10 +40,8 @@ public class AddCourseActivity extends AppCompatActivity {
         buttonIncreaseCapacity = findViewById(R.id.buttonIncreaseCapacity);
         buttonSaveCourse = findViewById(R.id.buttonSaveCourse);
 
-        // Set up Date Picker
+        // Set up Date and Time Pickers
         editTextDate.setOnClickListener(v -> showDatePicker());
-
-        // Set up Time Picker
         editTextTime.setOnClickListener(v -> showTimePicker());
 
         // Set up Increase/Decrease Capacity
@@ -97,6 +95,7 @@ public class AddCourseActivity extends AppCompatActivity {
 
     private void saveCourse() {
         // Retrieve and validate inputs
+        String courseIdStr = editTextCourseId.getText().toString().trim();
         String date = editTextDate.getText().toString().trim();
         String time = editTextTime.getText().toString().trim();
         String capacityStr = editTextCapacity.getText().toString().trim();
@@ -105,18 +104,19 @@ public class AddCourseActivity extends AppCompatActivity {
         String type = editTextType.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
 
-        if (date.isEmpty() || time.isEmpty() || capacityStr.isEmpty() || durationStr.isEmpty() ||
+        if (courseIdStr.isEmpty() || date.isEmpty() || time.isEmpty() || capacityStr.isEmpty() || durationStr.isEmpty() ||
                 priceStr.isEmpty() || type.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        int courseId = Integer.parseInt(courseIdStr);
         int capacity = Integer.parseInt(capacityStr);
         int duration = Integer.parseInt(durationStr);
         double price = Double.parseDouble(priceStr);
 
         // Insert data into the database
-        long result = dbHelper.insertCourse(date, time, capacity, duration, price, type, description);
+        long result = dbHelper.insertCourse(courseId, date, time, capacity, duration, price, type, description);
 
         if (result != -1) {
             Toast.makeText(this, "Course added successfully!", Toast.LENGTH_SHORT).show();

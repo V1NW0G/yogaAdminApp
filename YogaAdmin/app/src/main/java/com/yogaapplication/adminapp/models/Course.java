@@ -2,6 +2,7 @@ package com.yogaapplication.adminapp.models;
 
 public class Course {
     private int id;
+    private int courseId; // New field for CourseID
     private String day;
     private String time;
     private int capacity;
@@ -10,9 +11,10 @@ public class Course {
     private String type;
     private String description;
 
-    // Constructor
-    public Course(int id, String day, String time, int capacity, int duration, double price, String type, String description) {
+    // Updated Constructor
+    public Course(int id, int courseId, String day, String time, int capacity, int duration, double price, String type, String description) {
         this.id = id;
+        this.courseId = courseId;
         this.day = day;
         this.time = time;
         this.capacity = capacity;
@@ -29,6 +31,14 @@ public class Course {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
 
     public String getDay() {

@@ -6,17 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.yogaapplication.adminapp.models.Course;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class YogaDatabaseHelper extends SQLiteOpenHelper {
+
     private static final String DATABASE_NAME = "YogaAdmin.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Table and column names
     public static final String TABLE_COURSES = "courses";
     public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_COURSE_ID = "course_id";
     public static final String COLUMN_DAY = "day";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_CAPACITY = "capacity";
@@ -29,6 +30,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_COURSES + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_COURSE_ID + " INTEGER NOT NULL, " +
                     COLUMN_DAY + " TEXT NOT NULL, " +
                     COLUMN_TIME + " TEXT NOT NULL, " +
                     COLUMN_CAPACITY + " INTEGER NOT NULL, " +
@@ -48,15 +50,18 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_COURSES);
-        onCreate(db);
+        if (oldVersion < 2) {
+            // Add the new course_id column to the existing table
+            db.execSQL("ALTER TABLE " + TABLE_COURSES + " ADD COLUMN " + COLUMN_COURSE_ID + " INTEGER NOT NULL DEFAULT 0;");
+        }
     }
 
-    // Method to insert a course
-    public long insertCourse(String day, String time, int capacity, int duration, double price, String type, String description) {
+    // Method to insert a new course
+    public long insertCourse(int courseId, String day, String time, int capacity, int duration, double price, String type, String description) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        values.put(COLUMN_COURSE_ID, courseId);
         values.put(COLUMN_DAY, day);
         values.put(COLUMN_TIME, time);
         values.put(COLUMN_CAPACITY, capacity);
@@ -70,6 +75,36 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    // Method to search courses by name (with LIKE)
+    public List<Course> searchCoursesByName(String name) {
+        List<Course> courseList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_COURSES + " WHERE " + COLUMN_TYPE + " LIKE ?";
+        Cursor cursor = db.rawQuery(query, new String[]{"%" + name + "%"});
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                int courseId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COURSE_ID));
+                String day = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DAY));
+                String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME));
+                int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CAPACITY));
+                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION));
+                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE));
+                String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+
+                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description);
+                courseList.add(course);
+            }
+            cursor.close();
+        }
+
+        db.close();
+        return courseList;
+    }
+
     // Method to retrieve all courses
     public List<Course> getAllCourses() {
         List<Course> courseList = new ArrayList<>();
@@ -79,6 +114,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                int courseId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COURSE_ID));
                 String day = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DAY));
                 String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME));
                 int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CAPACITY));
@@ -87,7 +123,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
                 String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
 
-                Course course = new Course(id, day, time, capacity, duration, price, type, description);
+                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description);
                 courseList.add(course);
             } while (cursor.moveToNext());
 
@@ -98,7 +134,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return courseList;
     }
 
-    // Optional: Method to delete a course by ID
+    // Method to delete a course by ID
     public int deleteCourse(int courseId) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rowsDeleted = db.delete(TABLE_COURSES, COLUMN_ID + "=?", new String[]{String.valueOf(courseId)});
@@ -106,11 +142,12 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return rowsDeleted;
     }
 
-    // Optional: Method to update a course
-    public int updateCourse(int id, String day, String time, int capacity, int duration, double price, String type, String description) {
+    // Method to update a course
+    public int updateCourse(int id, int courseId, String day, String time, int capacity, int duration, double price, String type, String description) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        values.put(COLUMN_COURSE_ID, courseId);
         values.put(COLUMN_DAY, day);
         values.put(COLUMN_TIME, time);
         values.put(COLUMN_CAPACITY, capacity);
