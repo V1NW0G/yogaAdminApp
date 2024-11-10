@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Search bar and Add button container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <!-- Search Bar - 85% width -->
+        <EditText
+            android:id="@+id/search_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.85"
+            android:hint="Search classes"
+            android:padding="10dp"
+            android:background="@android:drawable/editbox_background"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Add Button - 15% width -->
+        <Button
+            android:id="@+id/add_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:text="+"/>
+    </LinearLayout>
+
+    <!-- Placeholder text when no courses are available -->
+    <TextView
+        android:id="@+id/no_courses_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No course details available. Click 'Add' to create a new course."
+        android:gravity="center"
+        android:visibility="visible"
+        android:textSize="16sp"
+        android:textColor="#888"/>
+
+    <!-- RecyclerView for displaying courses -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/course_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"/>
+</LinearLayout>
