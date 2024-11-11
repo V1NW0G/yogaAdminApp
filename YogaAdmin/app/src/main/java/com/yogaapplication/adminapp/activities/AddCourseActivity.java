@@ -15,7 +15,7 @@ import com.yogaapplication.adminapp.helper.YogaDatabaseHelper;
 import java.util.Calendar;
 
 public class AddCourseActivity extends AppCompatActivity {
-    private EditText editTextCourseId, editTextDate, editTextTime, editTextCapacity, editTextDuration, editTextPrice, editTextType, editTextDescription;
+    private EditText editTextCourseId, editTextDate, editTextTime, editTextCapacity, editTextDuration, editTextPrice, editTextType, editTextDescription, editTextTutorName;
     private TextView textViewCurrencySymbol;
     private Button buttonDecreaseCapacity, buttonIncreaseCapacity, buttonSaveCourse;
     private YogaDatabaseHelper dbHelper;
@@ -35,6 +35,7 @@ public class AddCourseActivity extends AppCompatActivity {
         editTextPrice = findViewById(R.id.editTextPrice);
         editTextType = findViewById(R.id.editTextType);
         editTextDescription = findViewById(R.id.editTextDescription);
+        editTextTutorName = findViewById(R.id.editTextTutorName); // New Tutor Name field
         textViewCurrencySymbol = findViewById(R.id.textViewCurrencySymbol);
         buttonDecreaseCapacity = findViewById(R.id.buttonDecreaseCapacity);
         buttonIncreaseCapacity = findViewById(R.id.buttonIncreaseCapacity);
@@ -103,6 +104,7 @@ public class AddCourseActivity extends AppCompatActivity {
         String priceStr = editTextPrice.getText().toString().trim();
         String type = editTextType.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
+        String tutorName = editTextTutorName.getText().toString().trim(); // Capture Tutor Name
 
         if (courseIdStr.isEmpty() || date.isEmpty() || time.isEmpty() || capacityStr.isEmpty() || durationStr.isEmpty() ||
                 priceStr.isEmpty() || type.isEmpty()) {
@@ -116,7 +118,7 @@ public class AddCourseActivity extends AppCompatActivity {
         double price = Double.parseDouble(priceStr);
 
         // Insert data into the database
-        long result = dbHelper.insertCourse(courseId, date, time, capacity, duration, price, type, description);
+        long result = dbHelper.insertCourse(courseId, date, time, capacity, duration, price, type, description, tutorName);
 
         if (result != -1) {
             Toast.makeText(this, "Course added successfully!", Toast.LENGTH_SHORT).show();

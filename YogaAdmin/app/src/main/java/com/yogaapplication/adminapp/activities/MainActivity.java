@@ -1,10 +1,9 @@
 package com.yogaapplication.adminapp.activities;
 
+import android.view.View;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,11 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.yogaapplication.adminapp.R;
+import com.yogaapplication.adminapp.adapters.GroupedCourseAdapter;
 import com.yogaapplication.adminapp.helper.YogaDatabaseHelper;
 import com.yogaapplication.adminapp.models.Course;
-import com.yogaapplication.adminapp.adapters.CourseAdapter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView noCoursesText;
     private RecyclerView courseRecyclerView;
     private YogaDatabaseHelper dbHelper;
-    private CourseAdapter courseAdapter;
+    private GroupedCourseAdapter courseAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,27 +75,38 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadCourses() {
         List<Course> courseList = dbHelper.getAllCourses();
-        if (courseList.isEmpty()) {
-            noCoursesText.setVisibility(View.VISIBLE);
-            courseRecyclerView.setVisibility(View.GONE);
-        } else {
-            noCoursesText.setVisibility(View.GONE);
-            courseRecyclerView.setVisibility(View.VISIBLE);
-            courseAdapter = new CourseAdapter(courseList);
-            courseRecyclerView.setAdapter(courseAdapter);
-        }
+        displayCourses(courseList);
     }
 
     private void searchCourses(String name) {
         List<Course> courseList = dbHelper.searchCoursesByName(name);
+        displayCourses(courseList);
+    }
+
+    private void displayCourses(List<Course> courseList) {
         if (courseList.isEmpty()) {
             noCoursesText.setVisibility(View.VISIBLE);
             courseRecyclerView.setVisibility(View.GONE);
         } else {
             noCoursesText.setVisibility(View.GONE);
             courseRecyclerView.setVisibility(View.VISIBLE);
-            courseAdapter = new CourseAdapter(courseList);
+
+            // Group courses by Course ID
+            Map<Integer, List<Course>> groupedCourses = groupCoursesByCourseId(courseList);
+            courseAdapter = new GroupedCourseAdapter(groupedCourses);
             courseRecyclerView.setAdapter(courseAdapter);
         }
+    }
+
+    private Map<Integer, List<Course>> groupCoursesByCourseId(List<Course> courseList) {
+        Map<Integer, List<Course>> groupedCourses = new HashMap<>();
+        for (Course course : courseList) {
+            int courseId = course.getCourseId();
+            if (!groupedCourses.containsKey(courseId)) {
+                groupedCourses.put(courseId, new ArrayList<>());
+            }
+            groupedCourses.get(courseId).add(course);
+        }
+        return groupedCourses;
     }
 }

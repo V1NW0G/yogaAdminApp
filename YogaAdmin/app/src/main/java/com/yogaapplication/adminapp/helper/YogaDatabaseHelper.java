@@ -12,7 +12,7 @@ import java.util.List;
 public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "YogaAdmin.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3; // Incremented version for schema update
 
     // Table and column names
     public static final String TABLE_COURSES = "courses";
@@ -25,6 +25,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PRICE = "price";
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_DESCRIPTION = "description";
+    public static final String COLUMN_TUTOR_NAME = "tutor_name"; // New column for tutor name
 
     // SQL statement to create the courses table
     private static final String TABLE_CREATE =
@@ -37,7 +38,8 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_DURATION + " INTEGER NOT NULL, " +
                     COLUMN_PRICE + " REAL NOT NULL, " +
                     COLUMN_TYPE + " TEXT NOT NULL, " +
-                    COLUMN_DESCRIPTION + " TEXT);";
+                    COLUMN_DESCRIPTION + " TEXT, " +
+                    COLUMN_TUTOR_NAME + " TEXT);"; // Nullable column for tutor name
 
     public YogaDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -50,14 +52,14 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 2) {
-            // Add the new course_id column to the existing table
-            db.execSQL("ALTER TABLE " + TABLE_COURSES + " ADD COLUMN " + COLUMN_COURSE_ID + " INTEGER NOT NULL DEFAULT 0;");
+        if (oldVersion < 3) {
+            // Add the new tutor_name column to the existing table
+            db.execSQL("ALTER TABLE " + TABLE_COURSES + " ADD COLUMN " + COLUMN_TUTOR_NAME + " TEXT;");
         }
     }
 
     // Method to insert a new course
-    public long insertCourse(int courseId, String day, String time, int capacity, int duration, double price, String type, String description) {
+    public long insertCourse(int courseId, String day, String time, int capacity, int duration, double price, String type, String description, String tutorName) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -69,6 +71,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PRICE, price);
         values.put(COLUMN_TYPE, type);
         values.put(COLUMN_DESCRIPTION, description);
+        values.put(COLUMN_TUTOR_NAME, tutorName); // Add Tutor Name to ContentValues
 
         long result = db.insert(TABLE_COURSES, null, values);
         db.close();
@@ -94,8 +97,9 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
                 double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE));
                 String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+                String tutorName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TUTOR_NAME));
 
-                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description);
+                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description, tutorName);
                 courseList.add(course);
             }
             cursor.close();
@@ -122,8 +126,9 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
                 double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE));
                 String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+                String tutorName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TUTOR_NAME));
 
-                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description);
+                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description, tutorName);
                 courseList.add(course);
             } while (cursor.moveToNext());
 
@@ -143,7 +148,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Method to update a course
-    public int updateCourse(int id, int courseId, String day, String time, int capacity, int duration, double price, String type, String description) {
+    public int updateCourse(int id, int courseId, String day, String time, int capacity, int duration, double price, String type, String description, String tutorName) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -155,6 +160,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PRICE, price);
         values.put(COLUMN_TYPE, type);
         values.put(COLUMN_DESCRIPTION, description);
+        values.put(COLUMN_TUTOR_NAME, tutorName);
 
         int rowsUpdated = db.update(TABLE_COURSES, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
         db.close();

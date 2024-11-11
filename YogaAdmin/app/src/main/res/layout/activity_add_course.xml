@@ -85,6 +85,14 @@
             android:backgroundTint="@color/gray"
             android:layout_marginTop="16dp"/>
 
+        <EditText
+            android:id="@+id/editTextTutorName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tutor Name (optional)"
+            android:padding="10dp"
+            android:inputType="textPersonName"/>
+
         <!-- Price EditText with Currency Symbol -->
         <LinearLayout
             android:layout_width="match_parent"
