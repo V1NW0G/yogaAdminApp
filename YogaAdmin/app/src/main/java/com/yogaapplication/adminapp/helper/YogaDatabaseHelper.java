@@ -12,7 +12,7 @@ import java.util.List;
 public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "YogaAdmin.db";
-    private static final int DATABASE_VERSION = 3; // Incremented version for schema update
+    private static final int DATABASE_VERSION = 3;
 
     // Table and column names
     public static final String TABLE_COURSES = "courses";
@@ -25,7 +25,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PRICE = "price";
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_DESCRIPTION = "description";
-    public static final String COLUMN_TUTOR_NAME = "tutor_name"; // New column for tutor name
+    public static final String COLUMN_TUTOR_NAME = "tutor_name";
 
     // SQL statement to create the courses table
     private static final String TABLE_CREATE =
@@ -39,7 +39,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_PRICE + " REAL NOT NULL, " +
                     COLUMN_TYPE + " TEXT NOT NULL, " +
                     COLUMN_DESCRIPTION + " TEXT, " +
-                    COLUMN_TUTOR_NAME + " TEXT);"; // Nullable column for tutor name
+                    COLUMN_TUTOR_NAME + " TEXT);";
 
     public YogaDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -53,7 +53,6 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 3) {
-            // Add the new tutor_name column to the existing table
             db.execSQL("ALTER TABLE " + TABLE_COURSES + " ADD COLUMN " + COLUMN_TUTOR_NAME + " TEXT;");
         }
     }
@@ -71,20 +70,23 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PRICE, price);
         values.put(COLUMN_TYPE, type);
         values.put(COLUMN_DESCRIPTION, description);
-        values.put(COLUMN_TUTOR_NAME, tutorName); // Add Tutor Name to ContentValues
+        values.put(COLUMN_TUTOR_NAME, tutorName);
 
         long result = db.insert(TABLE_COURSES, null, values);
         db.close();
         return result;
     }
 
-    // Method to search courses by name (with LIKE)
-    public List<Course> searchCoursesByName(String name) {
+    // Method to search courses by Course Type or Tutor Name
+    public List<Course> searchCoursesByName(String query) {
         List<Course> courseList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String query = "SELECT * FROM " + TABLE_COURSES + " WHERE " + COLUMN_TYPE + " LIKE ?";
-        Cursor cursor = db.rawQuery(query, new String[]{"%" + name + "%"});
+        // SQL to search in both Course Type and Tutor Name
+        String searchQuery = "SELECT * FROM " + TABLE_COURSES +
+                " WHERE " + COLUMN_TYPE + " LIKE ? OR " + COLUMN_TUTOR_NAME + " LIKE ?";
+        String likeQuery = "%" + query + "%";
+        Cursor cursor = db.rawQuery(searchQuery, new String[]{likeQuery, likeQuery});
 
         if (cursor != null) {
             while (cursor.moveToNext()) {

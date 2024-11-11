@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
         displayCourses(courseList);
     }
 
-    private void searchCourses(String name) {
-        List<Course> courseList = dbHelper.searchCoursesByName(name);
+    private void searchCourses(String query) {
+        List<Course> courseList = dbHelper.searchCoursesByName(query);
         displayCourses(courseList);
     }
 
