@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Search bar and Add button container -->
+    <!-- Search bar and Update button container -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,24 +14,58 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="16dp">
 
-        <!-- Search Bar - 85% width -->
+        <!-- Search Bar - 75% width -->
         <EditText
             android:id="@+id/search_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.85"
+            android:layout_weight="0.75"
             android:hint="Search classes"
             android:padding="10dp"
             android:background="@android:drawable/editbox_background"
             android:layout_marginEnd="8dp"/>
 
-        <!-- Add Button - 15% width -->
+        <!-- Update Button - 25% width -->
         <Button
-            android:id="@+id/add_button"
+            android:id="@+id/update_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.15"
-            android:text="+"/>
+            android:layout_weight="0.25"
+            android:text="Edit"/>
+    </LinearLayout>
+
+    <!-- Action Buttons (Update, Add, Delete) - Initially Hidden -->
+    <LinearLayout
+        android:id="@+id/action_buttons_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_horizontal">
+
+        <!-- Update Button - Left -->
+        <Button
+            android:id="@+id/update_secondary_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update" />
+
+        <!-- Add Button - Middle -->
+        <Button
+            android:id="@+id/add_button_secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Delete Button - Right -->
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete" />
     </LinearLayout>
 
     <!-- Placeholder text when no courses are available -->

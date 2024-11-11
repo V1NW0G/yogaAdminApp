@@ -23,11 +23,14 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private EditText searchBar;
-    private Button addButton;
+    private Button updateButton; // Renamed from addButton
+    private Button addActionButton, updateActionButton, deleteActionButton;
     private TextView noCoursesText;
     private RecyclerView courseRecyclerView;
     private YogaDatabaseHelper dbHelper;
     private GroupedCourseAdapter courseAdapter;
+    private View actionButtonsContainer;
+    private boolean isEditMode = false; // Variable to track edit mode
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +40,17 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new YogaDatabaseHelper(this);
 
         searchBar = findViewById(R.id.search_bar);
-        addButton = findViewById(R.id.add_button);
+        updateButton = findViewById(R.id.update_button); // Change from add_button to update_button
         noCoursesText = findViewById(R.id.no_courses_text);
         courseRecyclerView = findViewById(R.id.course_recycler_view);
+        actionButtonsContainer = findViewById(R.id.action_buttons_container);
+
+        addActionButton = findViewById(R.id.add_button_secondary);
+        updateActionButton = findViewById(R.id.update_secondary_button);
+        deleteActionButton = findViewById(R.id.delete_button);
+
+        // Initially hide the action buttons
+        actionButtonsContainer.setVisibility(View.GONE);
 
         // Set up RecyclerView
         courseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -47,8 +58,15 @@ public class MainActivity extends AppCompatActivity {
         // Load all courses initially
         loadCourses();
 
+        // Set up Update button to toggle action buttons and edit mode
+        updateButton.setOnClickListener(v -> {
+            isEditMode = !isEditMode; // Toggle edit mode
+            actionButtonsContainer.setVisibility(isEditMode ? View.VISIBLE : View.GONE); // Show or hide action buttons
+            courseAdapter.setEditMode(isEditMode); // Update adapter's edit mode
+        });
+
         // Set up Add button to navigate to AddCourseActivity
-        addButton.setOnClickListener(v -> {
+        addActionButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddCourseActivity.class);
             startActivity(intent);
         });
@@ -94,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             // Group courses by Course ID
             Map<Integer, List<Course>> groupedCourses = groupCoursesByCourseId(courseList);
             courseAdapter = new GroupedCourseAdapter(groupedCourses);
+            courseAdapter.setEditMode(isEditMode); // Apply edit mode to adapter
             courseRecyclerView.setAdapter(courseAdapter);
         }
     }

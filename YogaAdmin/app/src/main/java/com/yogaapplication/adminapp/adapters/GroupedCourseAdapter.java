@@ -1,14 +1,21 @@
 package com.yogaapplication.adminapp.adapters;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.cardview.widget.CardView;
 import com.yogaapplication.adminapp.R;
 import com.yogaapplication.adminapp.models.Course;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -16,9 +23,26 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int VIEW_TYPE_ITEM = 1;
 
     private final Map<Integer, List<Course>> groupedCourses;
+    private final Set<Integer> selectedCourseIds = new HashSet<>();
+    private final Set<Course> selectedItems = new HashSet<>();
+    private boolean isEditMode = false;
 
     public GroupedCourseAdapter(Map<Integer, List<Course>> groupedCourses) {
         this.groupedCourses = groupedCourses;
+    }
+
+    // Enable edit mode to show checkboxes
+    public void setEditMode(boolean isEditMode) {
+        this.isEditMode = isEditMode;
+        if (!isEditMode) {
+            clearSelections();
+        }
+        notifyDataSetChanged();
+    }
+
+    private void clearSelections() {
+        selectedCourseIds.clear();
+        selectedItems.clear();
     }
 
     @Override
@@ -42,16 +66,59 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderViewHolder) {
             int courseId = getCourseIdForPosition(position);
-            ((HeaderViewHolder) holder).courseIdText.setText("Course ID (" + courseId + ")");
+            HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
+
+            headerHolder.courseIdText.setText("Course ID (" + courseId + ")");
+            headerHolder.courseIdCheckBox.setVisibility(isEditMode ? View.VISIBLE : View.GONE);
+
+            headerHolder.courseIdCheckBox.setOnCheckedChangeListener(null);
+            headerHolder.courseIdCheckBox.setChecked(selectedCourseIds.contains(courseId));
+            headerHolder.courseIdCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    selectAllUnderCourseId(courseId);
+                } else {
+                    deselectAllUnderCourseId(courseId);
+                }
+                notifyDataSetChanged();
+            });
+
         } else if (holder instanceof ItemViewHolder) {
             Course course = getCourseForPosition(position);
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
+
             itemHolder.courseTypeText.setText("Type: " + course.getType());
             itemHolder.courseDayDateText.setText(course.getDay());
             itemHolder.courseTimeText.setText("Time: " + course.getTime());
             itemHolder.courseTutorText.setText("Tutor: " + (course.getTutorName() == null ? "N/A" : course.getTutorName()));
             itemHolder.courseDurationText.setText("Duration: " + formatDuration(course.getDuration()));
+
+            itemHolder.courseCheckBox.setVisibility(isEditMode ? View.VISIBLE : View.GONE);
+            itemHolder.courseCheckBox.setOnCheckedChangeListener(null);
+            itemHolder.courseCheckBox.setChecked(selectedItems.contains(course));
+            itemHolder.courseCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    selectedItems.add(course);
+                } else {
+                    selectedItems.remove(course);
+                }
+                notifyDataSetChanged();
+            });
+
+            // Update border based on selection
+            int borderColor = selectedItems.contains(course)
+                    ? ContextCompat.getColor(itemHolder.itemView.getContext(), R.color.primaryColor)
+                    : Color.TRANSPARENT;
+
+            setCardBorderColor(itemHolder.cardView, borderColor);
         }
+    }
+
+    private void setCardBorderColor(CardView cardView, int color) {
+        GradientDrawable borderDrawable = new GradientDrawable();
+        borderDrawable.setCornerRadius(8); // Adjust the radius as needed
+        borderDrawable.setStroke(4, color == Color.TRANSPARENT ? Color.LTGRAY : color);
+        borderDrawable.setColor(Color.WHITE); // Set card background color if needed
+        cardView.setBackground(borderDrawable);
     }
 
     @Override
@@ -109,17 +176,31 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
         return hours > 0 ? hours + " hr " + minutes + " mins" : minutes + " mins";
     }
 
+    private void selectAllUnderCourseId(int courseId) {
+        selectedCourseIds.add(courseId);
+        selectedItems.addAll(groupedCourses.get(courseId));
+    }
+
+    private void deselectAllUnderCourseId(int courseId) {
+        selectedCourseIds.remove(courseId);
+        selectedItems.removeAll(groupedCourses.get(courseId));
+    }
+
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView courseIdText;
+        CheckBox courseIdCheckBox;
 
         HeaderViewHolder(View itemView) {
             super(itemView);
             courseIdText = itemView.findViewById(R.id.course_id);
+            courseIdCheckBox = itemView.findViewById(R.id.course_id_checkbox);
         }
     }
 
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView courseTypeText, courseDayDateText, courseTimeText, courseTutorText, courseDurationText;
+        CheckBox courseCheckBox;
+        CardView cardView;
 
         ItemViewHolder(View itemView) {
             super(itemView);
@@ -128,6 +209,8 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
             courseTimeText = itemView.findViewById(R.id.course_time);
             courseTutorText = itemView.findViewById(R.id.course_tutor);
             courseDurationText = itemView.findViewById(R.id.course_duration);
+            courseCheckBox = itemView.findViewById(R.id.course_checkbox);
+            cardView = itemView.findViewById(R.id.card_view); // Reference to the CardView for border color change
         }
     }
 }

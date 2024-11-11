@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/course_id"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
     android:padding="8dp"
-    android:text="Course ID (123)"
-    android:textSize="16sp"
-    android:textStyle="bold"
-    android:background="@android:color/white"
-    android:textColor="@android:color/black" />
+    android:gravity="center_vertical">
+
+    <!-- Course ID CheckBox for selecting all items under the course ID -->
+    <CheckBox
+        android:id="@+id/course_id_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="8dp"/>
+
+    <!-- Text view for displaying the Course ID -->
+    <TextView
+        android:id="@+id/course_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Course ID (123)"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+</LinearLayout>
