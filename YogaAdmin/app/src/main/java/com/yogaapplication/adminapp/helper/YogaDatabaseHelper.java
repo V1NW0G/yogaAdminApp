@@ -82,7 +82,6 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         List<Course> courseList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        // SQL to search in both Course Type and Tutor Name
         String searchQuery = "SELECT * FROM " + TABLE_COURSES +
                 " WHERE " + COLUMN_TYPE + " LIKE ? OR " + COLUMN_TUTOR_NAME + " LIKE ?";
         String likeQuery = "%" + query + "%";
@@ -141,10 +140,18 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return courseList;
     }
 
-    // Method to delete a course by ID
-    public int deleteCourse(int courseId) {
+    // Method to delete a specific course by its unique ID
+    public int deleteCourse(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        int rowsDeleted = db.delete(TABLE_COURSES, COLUMN_ID + "=?", new String[]{String.valueOf(courseId)});
+        int rowsDeleted = db.delete(TABLE_COURSES, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+        db.close();
+        return rowsDeleted;
+    }
+
+    // Method to delete all classes under a specific Course ID
+    public int deleteCourseByCourseId(int courseId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = db.delete(TABLE_COURSES, COLUMN_COURSE_ID + "=?", new String[]{String.valueOf(courseId)});
         db.close();
         return rowsDeleted;
     }

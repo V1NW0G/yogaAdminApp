@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.cardview.widget.CardView;
 import com.yogaapplication.adminapp.R;
 import com.yogaapplication.adminapp.models.Course;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +27,18 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     private final Set<Integer> selectedCourseIds = new HashSet<>();
     private final Set<Course> selectedItems = new HashSet<>();
     private boolean isEditMode = false;
+    private final OnDeleteListener onDeleteListener;
 
-    public GroupedCourseAdapter(Map<Integer, List<Course>> groupedCourses) {
+    public GroupedCourseAdapter(Map<Integer, List<Course>> groupedCourses, OnDeleteListener onDeleteListener) {
         this.groupedCourses = groupedCourses;
+        this.onDeleteListener = onDeleteListener;
     }
 
-    // Enable edit mode to show checkboxes
+    public interface OnDeleteListener {
+        void onDeleteCourse(Course course);
+        void onDeleteCourseGroup(int courseId);
+    }
+
     public void setEditMode(boolean isEditMode) {
         this.isEditMode = isEditMode;
         if (!isEditMode) {
@@ -40,9 +47,17 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyDataSetChanged();
     }
 
-    private void clearSelections() {
+    public void clearSelections() {
         selectedCourseIds.clear();
         selectedItems.clear();
+    }
+
+    public Set<Course> getSelectedItems() {
+        return new HashSet<>(selectedItems);
+    }
+
+    public Set<Integer> getSelectedCourseIds() {
+        return new HashSet<>(selectedCourseIds);
     }
 
     @Override
@@ -82,6 +97,11 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
                 notifyDataSetChanged();
             });
 
+            headerHolder.itemView.setOnLongClickListener(v -> {
+                onDeleteListener.onDeleteCourseGroup(courseId);
+                return true;
+            });
+
         } else if (holder instanceof ItemViewHolder) {
             Course course = getCourseForPosition(position);
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
@@ -104,20 +124,24 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
                 notifyDataSetChanged();
             });
 
-            // Update border based on selection
             int borderColor = selectedItems.contains(course)
                     ? ContextCompat.getColor(itemHolder.itemView.getContext(), R.color.primaryColor)
-                    : Color.TRANSPARENT;
+                    : Color.LTGRAY;
 
             setCardBorderColor(itemHolder.cardView, borderColor);
+
+            itemHolder.itemView.setOnLongClickListener(v -> {
+                onDeleteListener.onDeleteCourse(course);
+                return true;
+            });
         }
     }
 
     private void setCardBorderColor(CardView cardView, int color) {
         GradientDrawable borderDrawable = new GradientDrawable();
-        borderDrawable.setCornerRadius(8); // Adjust the radius as needed
-        borderDrawable.setStroke(4, color == Color.TRANSPARENT ? Color.LTGRAY : color);
-        borderDrawable.setColor(Color.WHITE); // Set card background color if needed
+        borderDrawable.setCornerRadius(8);
+        borderDrawable.setStroke(4, color);
+        borderDrawable.setColor(Color.WHITE);
         cardView.setBackground(borderDrawable);
     }
 
@@ -210,7 +234,7 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
             courseTutorText = itemView.findViewById(R.id.course_tutor);
             courseDurationText = itemView.findViewById(R.id.course_duration);
             courseCheckBox = itemView.findViewById(R.id.course_checkbox);
-            cardView = itemView.findViewById(R.id.card_view); // Reference to the CardView for border color change
+            cardView = itemView.findViewById(R.id.card_view);
         }
     }
 }
