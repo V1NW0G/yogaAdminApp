@@ -16,8 +16,12 @@ import com.yogaapplication.adminapp.R;
 import com.yogaapplication.adminapp.activities.AddCourseActivity;
 import com.yogaapplication.adminapp.models.Course;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,12 +47,10 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
         void onDeleteCourseGroup(int courseId);
     }
 
-    // Interface for the add class click listener
     public interface OnAddClassClickListener {
         void onAddClass(int courseId);
     }
 
-    // Method to set the add class click listener
     public void setOnAddClassClickListener(OnAddClassClickListener listener) {
         this.onAddClassClickListener = listener;
     }
@@ -128,7 +130,7 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
 
             itemHolder.courseTypeText.setText("Type: " + course.getType());
-            itemHolder.courseDayDateText.setText(course.getDay());
+            itemHolder.courseDayDateText.setText(getDayAndDate(course.getDay()));
             itemHolder.courseTimeText.setText("Time: " + course.getTime());
             itemHolder.courseTutorText.setText("Tutor: " + (course.getTutorName() == null ? "N/A" : course.getTutorName()));
             itemHolder.courseDurationText.setText("Duration: " + formatDuration(course.getDuration()));
@@ -229,6 +231,19 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     private void deselectAllUnderCourseId(int courseId) {
         selectedCourseIds.remove(courseId);
         selectedItems.removeAll(groupedCourses.get(courseId));
+    }
+
+    // Helper to format the date as "Day of the Week\nYYYY-MM-DD"
+    private String getDayAndDate(String dateString) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE\nyyyy-MM-dd", Locale.getDefault());
+
+        try {
+            return outputFormat.format(inputFormat.parse(dateString));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return dateString; // fallback to raw date if parsing fails
+        }
     }
 
     static class HeaderViewHolder extends RecyclerView.ViewHolder {

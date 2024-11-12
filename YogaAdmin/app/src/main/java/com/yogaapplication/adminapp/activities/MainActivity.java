@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
@@ -25,13 +28,15 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements GroupedCourseAdapter.OnDeleteListener {
 
     private EditText searchBar;
-    private Button updateButton, addActionButton, updateActionButton, deleteActionButton;
-    private TextView noCoursesText;
+    private Button updateButton, addActionButton, updateActionButton, deleteActionButton, clearButton;
+    private TextView noCoursesText, advancedSearchToggle;
     private RecyclerView courseRecyclerView;
+    private Spinner dayFilterSpinner;
     private YogaDatabaseHelper dbHelper;
     private GroupedCourseAdapter courseAdapter;
-    private View actionButtonsContainer;
+    private View actionButtonsContainer, advancedSearchLayout;
     private boolean isEditMode = false;
+    private String selectedDay = ""; // Holds selected day filter
 
     private static final int REQUEST_CODE_UPDATE = 1;
     private static final int REQUEST_CODE_ADD_COURSE = 2;
@@ -46,31 +51,32 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
         // Initialize UI elements
         searchBar = findViewById(R.id.search_bar);
         updateButton = findViewById(R.id.update_button);
+        clearButton = findViewById(R.id.clear_button); // Clear button for search
         noCoursesText = findViewById(R.id.no_courses_text);
         courseRecyclerView = findViewById(R.id.course_recycler_view);
         actionButtonsContainer = findViewById(R.id.action_buttons_container);
         addActionButton = findViewById(R.id.add_button_secondary);
         updateActionButton = findViewById(R.id.update_secondary_button);
         deleteActionButton = findViewById(R.id.delete_button);
+        advancedSearchToggle = findViewById(R.id.advanced_search_toggle);
+        advancedSearchLayout = findViewById(R.id.advanced_search_layout);
+        dayFilterSpinner = findViewById(R.id.day_filter_spinner);
 
         actionButtonsContainer.setVisibility(View.GONE);
         courseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         loadCourses();
+        setupAdvancedSearch();
 
-        // Toggle edit mode
         updateButton.setOnClickListener(v -> toggleEditMode());
 
-        // Add course
         addActionButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddCourseActivity.class);
             startActivity(intent);
         });
 
-        // Update selected courses
         updateActionButton.setOnClickListener(v -> updateSelectedCourses());
 
-        // Delete selected courses
         deleteActionButton.setOnClickListener(v -> {
             if (isEditMode) {
                 new AlertDialog.Builder(this)
@@ -85,23 +91,59 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
             }
         });
 
-        // Search functionality
         searchBar.addTextChangedListener(new android.text.TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString().trim();
-                if (!TextUtils.isEmpty(query)) {
-                    searchCourses(query);
-                } else {
-                    loadCourses();
-                }
+                performSearch();
             }
 
             @Override
             public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        // Clear button functionality
+        clearButton.setOnClickListener(v -> {
+            searchBar.setText("");             // Clear search bar
+            dayFilterSpinner.setSelection(0);  // Reset spinner to the default option
+            selectedDay = "";                  // Reset the selected day filter
+            loadCourses();                     // Reload all courses
+        });
+    }
+
+    private void setupAdvancedSearch() {
+        // Set the initial text with "Advanced Search ▼"
+        advancedSearchToggle.setText("Advanced Search ▼");
+
+        // Toggle visibility of the advanced search layout
+        advancedSearchToggle.setOnClickListener(v -> {
+            if (advancedSearchLayout.getVisibility() == View.GONE) {
+                advancedSearchLayout.setVisibility(View.VISIBLE);
+                advancedSearchToggle.setText("Advanced Search ▲"); // Show "▲" when expanded
+            } else {
+                advancedSearchLayout.setVisibility(View.GONE);
+                advancedSearchToggle.setText("Advanced Search ▼"); // Show "▼" when collapsed
+            }
+        });
+
+        // Set up the day filter spinner with days of the week
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.days_of_week, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        dayFilterSpinner.setAdapter(adapter);
+
+        // Set selected day when a day is chosen
+        dayFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedDay = position == 0 ? "" : parent.getItemAtPosition(position).toString();
+                performSearch(); // Refresh search results when day filter changes
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 
@@ -116,9 +158,19 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
         displayCourses(courseList);
     }
 
-    private void searchCourses(String query) {
-        List<Course> courseList = dbHelper.searchCoursesByName(query);
-        displayCourses(courseList);
+    private void performSearch() {
+        String query = searchBar.getText().toString().trim();
+        List<Course> filteredCourses;
+
+        if (!TextUtils.isEmpty(selectedDay) && !TextUtils.isEmpty(query)) {
+            filteredCourses = dbHelper.searchCoursesByDayOfWeekAndName(selectedDay, query);
+        } else if (!TextUtils.isEmpty(selectedDay)) {
+            filteredCourses = dbHelper.searchCoursesByDayOfWeek(selectedDay);
+        } else {
+            filteredCourses = dbHelper.searchCoursesByName(query);
+        }
+
+        displayCourses(filteredCourses);
     }
 
     private void displayCourses(List<Course> courseList) {
@@ -151,11 +203,10 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
 
     private void navigateToAddClassWithCourseId(int courseId) {
         Intent intent = new Intent(MainActivity.this, AddCourseActivity.class);
-        intent.putExtra("courseId", courseId); // Pass the course ID to AddCourseActivity
+        intent.putExtra("courseId", courseId);
         startActivityForResult(intent, REQUEST_CODE_ADD_COURSE);
     }
 
-    // Delete an individual class
     @Override
     public void onDeleteCourse(Course course) {
         new AlertDialog.Builder(this)
@@ -170,7 +221,6 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
                 .show();
     }
 
-    // Delete an entire course group
     @Override
     public void onDeleteCourseGroup(int courseId) {
         new AlertDialog.Builder(this)
@@ -185,7 +235,6 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
                 .show();
     }
 
-    // Delete selected items in edit mode
     private void deleteSelectedItems() {
         for (Course course : courseAdapter.getSelectedItems()) {
             dbHelper.deleteCourse(course.getId());
@@ -197,13 +246,12 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
         courseAdapter.clearSelections();
     }
 
-    // Update selected items in edit mode
     private void updateSelectedCourses() {
         List<Course> selectedCourses = new ArrayList<>(courseAdapter.getSelectedItems());
         if (!selectedCourses.isEmpty()) {
             Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
             intent.putParcelableArrayListExtra("selectedCourses", new ArrayList<>(selectedCourses));
-            startActivityForResult(intent, REQUEST_CODE_UPDATE); // Use startActivityForResult
+            startActivityForResult(intent, REQUEST_CODE_UPDATE);
         } else {
             Toast.makeText(this, "Please select courses to update", Toast.LENGTH_SHORT).show();
         }
@@ -213,9 +261,9 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_UPDATE && resultCode == RESULT_OK) {
-            loadCourses(); // Reload courses to reflect updated data
+            loadCourses();
         } else if (requestCode == REQUEST_CODE_ADD_COURSE && resultCode == RESULT_OK) {
-            loadCourses(); // Reload courses to reflect added data
+            loadCourses();
         }
     }
 }

@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Search bar and Update button container -->
+    <!-- Search bar, Clear, and Update button container -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,24 +14,70 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="16dp">
 
-        <!-- Search Bar - 75% width -->
+        <!-- Search Bar - 65% width -->
         <EditText
             android:id="@+id/search_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.75"
+            android:layout_weight="0.55"
             android:hint="Search classes"
             android:padding="10dp"
             android:background="@android:drawable/editbox_background"
             android:layout_marginEnd="8dp"/>
 
-        <!-- Update Button - 25% width -->
+        <!-- Clear Button - 15% width -->
+        <Button
+            android:id="@+id/clear_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:text="Clear" />
+
+        <!-- Update Button - 20% width -->
         <Button
             android:id="@+id/update_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25"
+            android:layout_weight="0.20"
             android:text="Edit"/>
+    </LinearLayout>
+
+    <!-- TextView to toggle Advanced Search options (styled as clickable text) -->
+    <TextView
+        android:id="@+id/advanced_search_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Advanced Search ▼"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:padding="8dp" />
+
+    <!-- Advanced Search options (Initially hidden) -->
+    <LinearLayout
+        android:id="@+id/advanced_search_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="8dp"
+        android:background="#f0f0f0">
+
+        <!-- Spinner for selecting day filter -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter by Day:"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <Spinner
+            android:id="@+id/day_filter_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"/>
     </LinearLayout>
 
     <!-- Action Buttons (Update, Add, Delete) - Initially Hidden -->

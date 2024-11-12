@@ -6,8 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.yogaapplication.adminapp.models.Course;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
@@ -27,7 +29,6 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_TUTOR_NAME = "tutor_name";
 
-    // SQL statement to create the courses table
     private static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_COURSES + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -54,6 +55,18 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 3) {
             db.execSQL("ALTER TABLE " + TABLE_COURSES + " ADD COLUMN " + COLUMN_TUTOR_NAME + " TEXT;");
+        }
+    }
+
+    // Helper method to get the day of the week from a date string
+    private String getDayOfWeek(String date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
+        try {
+            return dayFormat.format(dateFormat.parse(date));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ""; // Return empty if parsing fails
         }
     }
 
@@ -90,6 +103,50 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 courseList.add(createCourseFromCursor(cursor));
+            }
+            cursor.close();
+        }
+        db.close();
+        return courseList;
+    }
+
+    // Search courses by day of the week
+    public List<Course> searchCoursesByDayOfWeek(String dayOfWeek) {
+        List<Course> courseList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_COURSES;
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Course course = createCourseFromCursor(cursor);
+                if (getDayOfWeek(course.getDay()).equalsIgnoreCase(dayOfWeek)) {
+                    courseList.add(course);
+                }
+            }
+            cursor.close();
+        }
+        db.close();
+        return courseList;
+    }
+
+    // Search courses by day of the week and name
+    public List<Course> searchCoursesByDayOfWeekAndName(String dayOfWeek, String query) {
+        List<Course> courseList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String likeQuery = "%" + query + "%";
+        String searchQuery = "SELECT * FROM " + TABLE_COURSES;
+        Cursor cursor = db.rawQuery(searchQuery, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Course course = createCourseFromCursor(cursor);
+                if (getDayOfWeek(course.getDay()).equalsIgnoreCase(dayOfWeek) &&
+                        (course.getType().contains(query) || course.getTutorName().contains(query))) {
+                    courseList.add(course);
+                }
             }
             cursor.close();
         }
