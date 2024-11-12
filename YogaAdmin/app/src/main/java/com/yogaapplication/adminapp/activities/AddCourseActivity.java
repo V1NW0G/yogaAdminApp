@@ -35,11 +35,18 @@ public class AddCourseActivity extends AppCompatActivity {
         editTextPrice = findViewById(R.id.editTextPrice);
         editTextType = findViewById(R.id.editTextType);
         editTextDescription = findViewById(R.id.editTextDescription);
-        editTextTutorName = findViewById(R.id.editTextTutorName); // New Tutor Name field
+        editTextTutorName = findViewById(R.id.editTextTutorName);
         textViewCurrencySymbol = findViewById(R.id.textViewCurrencySymbol);
         buttonDecreaseCapacity = findViewById(R.id.buttonDecreaseCapacity);
         buttonIncreaseCapacity = findViewById(R.id.buttonIncreaseCapacity);
         buttonSaveCourse = findViewById(R.id.buttonSaveCourse);
+
+        // Check if Course ID is provided and set it
+        int prefilledCourseId = getIntent().getIntExtra("courseId", -1);
+        if (prefilledCourseId != -1) {
+            editTextCourseId.setText(String.valueOf(prefilledCourseId));
+            editTextCourseId.setEnabled(false); // Disable editing if pre-filled
+        }
 
         // Set up Date and Time Pickers
         editTextDate.setOnClickListener(v -> showDatePicker());
@@ -104,7 +111,7 @@ public class AddCourseActivity extends AppCompatActivity {
         String priceStr = editTextPrice.getText().toString().trim();
         String type = editTextType.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
-        String tutorName = editTextTutorName.getText().toString().trim(); // Capture Tutor Name
+        String tutorName = editTextTutorName.getText().toString().trim();
 
         if (courseIdStr.isEmpty() || date.isEmpty() || time.isEmpty() || capacityStr.isEmpty() || durationStr.isEmpty() ||
                 priceStr.isEmpty() || type.isEmpty()) {
@@ -123,8 +130,7 @@ public class AddCourseActivity extends AppCompatActivity {
         if (result != -1) {
             Toast.makeText(this, "Course added successfully!", Toast.LENGTH_SHORT).show();
             // Return to MainActivity to display the new course
-            Intent intent = new Intent(AddCourseActivity.this, MainActivity.class);
-            startActivity(intent);
+            setResult(RESULT_OK); // Notify MainActivity to reload data
             finish(); // Close this activity
         } else {
             Toast.makeText(this, "Failed to add course. Please try again.", Toast.LENGTH_SHORT).show();

@@ -57,7 +57,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // Method to insert a new course
+    // Insert a new course
     public long insertCourse(int courseId, String day, String time, int capacity, int duration, double price, String type, String description, String tutorName) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -77,7 +77,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    // Method to search courses by Course Type or Tutor Name
+    // Search courses by Course Type or Tutor Name
     public List<Course> searchCoursesByName(String query) {
         List<Course> courseList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -89,28 +89,15 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                int courseId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COURSE_ID));
-                String day = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DAY));
-                String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME));
-                int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CAPACITY));
-                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION));
-                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE));
-                String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                String tutorName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TUTOR_NAME));
-
-                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description, tutorName);
-                courseList.add(course);
+                courseList.add(createCourseFromCursor(cursor));
             }
             cursor.close();
         }
-
         db.close();
         return courseList;
     }
 
-    // Method to retrieve all courses
+    // Retrieve all courses
     public List<Course> getAllCourses() {
         List<Course> courseList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -118,29 +105,32 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                int courseId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COURSE_ID));
-                String day = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DAY));
-                String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME));
-                int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CAPACITY));
-                int duration = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION));
-                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE));
-                String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                String tutorName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TUTOR_NAME));
-
-                Course course = new Course(id, courseId, day, time, capacity, duration, price, type, description, tutorName);
-                courseList.add(course);
+                courseList.add(createCourseFromCursor(cursor));
             } while (cursor.moveToNext());
 
             cursor.close();
         }
-
         db.close();
         return courseList;
     }
 
-    // Method to delete a specific course by its unique ID
+    // Helper to create a Course object from a cursor
+    private Course createCourseFromCursor(Cursor cursor) {
+        int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+        int courseId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COURSE_ID));
+        String day = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DAY));
+        String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME));
+        int capacity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CAPACITY));
+        int duration = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION));
+        double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRICE));
+        String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE));
+        String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+        String tutorName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TUTOR_NAME));
+
+        return new Course(id, courseId, day, time, capacity, duration, price, type, description, tutorName);
+    }
+
+    // Delete a specific course by its unique ID
     public int deleteCourse(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rowsDeleted = db.delete(TABLE_COURSES, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
@@ -148,7 +138,7 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return rowsDeleted;
     }
 
-    // Method to delete all classes under a specific Course ID
+    // Delete all classes under a specific Course ID
     public int deleteCourseByCourseId(int courseId) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rowsDeleted = db.delete(TABLE_COURSES, COLUMN_COURSE_ID + "=?", new String[]{String.valueOf(courseId)});
@@ -156,22 +146,22 @@ public class YogaDatabaseHelper extends SQLiteOpenHelper {
         return rowsDeleted;
     }
 
-    // Method to update a course
-    public int updateCourse(int id, int courseId, String day, String time, int capacity, int duration, double price, String type, String description, String tutorName) {
+    // Update a course using a Course object
+    public int updateCourse(Course course) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(COLUMN_COURSE_ID, courseId);
-        values.put(COLUMN_DAY, day);
-        values.put(COLUMN_TIME, time);
-        values.put(COLUMN_CAPACITY, capacity);
-        values.put(COLUMN_DURATION, duration);
-        values.put(COLUMN_PRICE, price);
-        values.put(COLUMN_TYPE, type);
-        values.put(COLUMN_DESCRIPTION, description);
-        values.put(COLUMN_TUTOR_NAME, tutorName);
+        values.put(COLUMN_COURSE_ID, course.getCourseId());
+        values.put(COLUMN_DAY, course.getDay());
+        values.put(COLUMN_TIME, course.getTime());
+        values.put(COLUMN_CAPACITY, course.getCapacity());
+        values.put(COLUMN_DURATION, course.getDuration());
+        values.put(COLUMN_PRICE, course.getPrice());
+        values.put(COLUMN_TYPE, course.getType());
+        values.put(COLUMN_DESCRIPTION, course.getDescription());
+        values.put(COLUMN_TUTOR_NAME, course.getTutorName());
 
-        int rowsUpdated = db.update(TABLE_COURSES, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+        int rowsUpdated = db.update(TABLE_COURSES, values, COLUMN_ID + "=?", new String[]{String.valueOf(course.getId())});
         db.close();
         return rowsUpdated;
     }

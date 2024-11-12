@@ -1,16 +1,19 @@
 package com.yogaapplication.adminapp.adapters;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.cardview.widget.CardView;
 import com.yogaapplication.adminapp.R;
+import com.yogaapplication.adminapp.activities.AddCourseActivity;
 import com.yogaapplication.adminapp.models.Course;
 
 import java.util.HashSet;
@@ -28,6 +31,7 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     private final Set<Course> selectedItems = new HashSet<>();
     private boolean isEditMode = false;
     private final OnDeleteListener onDeleteListener;
+    private OnAddClassClickListener onAddClassClickListener;
 
     public GroupedCourseAdapter(Map<Integer, List<Course>> groupedCourses, OnDeleteListener onDeleteListener) {
         this.groupedCourses = groupedCourses;
@@ -37,6 +41,16 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     public interface OnDeleteListener {
         void onDeleteCourse(Course course);
         void onDeleteCourseGroup(int courseId);
+    }
+
+    // Interface for the add class click listener
+    public interface OnAddClassClickListener {
+        void onAddClass(int courseId);
+    }
+
+    // Method to set the add class click listener
+    public void setOnAddClassClickListener(OnAddClassClickListener listener) {
+        this.onAddClassClickListener = listener;
     }
 
     public void setEditMode(boolean isEditMode) {
@@ -85,6 +99,7 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             headerHolder.courseIdText.setText("Course ID (" + courseId + ")");
             headerHolder.courseIdCheckBox.setVisibility(isEditMode ? View.VISIBLE : View.GONE);
+            headerHolder.addClassButton.setVisibility(isEditMode ? View.VISIBLE : View.GONE);
 
             headerHolder.courseIdCheckBox.setOnCheckedChangeListener(null);
             headerHolder.courseIdCheckBox.setChecked(selectedCourseIds.contains(courseId));
@@ -95,6 +110,12 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
                     deselectAllUnderCourseId(courseId);
                 }
                 notifyDataSetChanged();
+            });
+
+            headerHolder.addClassButton.setOnClickListener(v -> {
+                if (onAddClassClickListener != null) {
+                    onAddClassClickListener.onAddClass(courseId);
+                }
             });
 
             headerHolder.itemView.setOnLongClickListener(v -> {
@@ -213,11 +234,13 @@ public class GroupedCourseAdapter extends RecyclerView.Adapter<RecyclerView.View
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView courseIdText;
         CheckBox courseIdCheckBox;
+        ImageButton addClassButton;
 
         HeaderViewHolder(View itemView) {
             super(itemView);
             courseIdText = itemView.findViewById(R.id.course_id);
             courseIdCheckBox = itemView.findViewById(R.id.course_id_checkbox);
+            addClassButton = itemView.findViewById(R.id.add_class_button);
         }
     }
 
