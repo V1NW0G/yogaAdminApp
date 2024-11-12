@@ -28,8 +28,8 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements GroupedCourseAdapter.OnDeleteListener {
 
     private EditText searchBar;
-    private Button updateButton, addActionButton, updateActionButton, deleteActionButton, clearButton;
-    private TextView noCoursesText, advancedSearchToggle;
+    private Button updateButton, addActionButton, updateActionButton, deleteActionButton;
+    private TextView noCoursesText, advancedSearchToggle, clearText;
     private RecyclerView courseRecyclerView;
     private Spinner dayFilterSpinner;
     private YogaDatabaseHelper dbHelper;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
         // Initialize UI elements
         searchBar = findViewById(R.id.search_bar);
         updateButton = findViewById(R.id.update_button);
-        clearButton = findViewById(R.id.clear_button); // Clear button for search
+        clearText = findViewById(R.id.clear_text); // Clear text for search
         noCoursesText = findViewById(R.id.no_courses_text);
         courseRecyclerView = findViewById(R.id.course_recycler_view);
         actionButtonsContainer = findViewById(R.id.action_buttons_container);
@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements GroupedCourseAdap
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Clear button functionality
-        clearButton.setOnClickListener(v -> {
+        // Clear text functionality
+        clearText.setOnClickListener(v -> {
             searchBar.setText("");             // Clear search bar
             dayFilterSpinner.setSelection(0);  // Reset spinner to the default option
             selectedDay = "";                  // Reset the selected day filter
